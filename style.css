@@ -1,10 +1,8 @@
 /* =============================================
-   MEMORIES — style.css (refactored)
-   Fixes: text jump, black overflow, gradients
-   Features: glassmorphism, grain, animations
+   MEMORIES — style.css
    ============================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
 /* ---- Reset & Base ---- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -13,15 +11,30 @@ body {
   background-color: #010302;
   margin: 0;
   font-family: 'Josefin Sans', sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   color: #d4e8d5;
   overflow-x: hidden;
-  /* native scrollbar hidden — custom one used */
-  scrollbar-width: none;
 }
-body::-webkit-scrollbar { display: none; }
 
-/* ---- Film grain overlay (canvas) ---- */
+/* ---- Styled native scrollbar (1 cái duy nhất, không div HTML) ---- */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.04);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(192, 235, 194, 0.30);
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(192, 235, 194, 0.72);
+}
+/* Firefox */
+* { scrollbar-width: thin; scrollbar-color: rgba(192,235,194,0.30) rgba(255,255,255,0.04); }
+
+/* ---- Film grain overlay ---- */
 #grain-canvas {
   position: fixed;
   top: 0; left: 0;
@@ -31,41 +44,7 @@ body::-webkit-scrollbar { display: none; }
   mix-blend-mode: overlay;
 }
 
-/* ---- Custom scrollbar ---- */
-.scroll-track {
-  position: fixed;
-  right: 8px;
-  top: 10%;
-  height: 80vh;
-  width: 4px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.06);
-  z-index: 1000;
-  opacity: 0.4;
-  transition: opacity 0.3s;
-}
-.scroll-track:hover { opacity: 1; }
-
-.scroll-thumb {
-  position: absolute;
-  left: 0;
-  width: 4px;
-  border-radius: 4px;
-  background: rgba(192, 235, 194, 0.35);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  cursor: grab;
-  transition: background 0.3s, width 0.2s, left 0.2s;
-}
-.scroll-thumb:hover,
-.scroll-thumb:active {
-  background: rgba(192, 235, 194, 0.75);
-  width: 6px;
-  left: -1px;
-  cursor: grabbing;
-}
-
-/* ---- Music / HUD bar ---- */
+/* ---- Music HUD bar (fixed bottom-right) ---- */
 .hud-bar {
   position: fixed;
   bottom: 24px;
@@ -74,22 +53,20 @@ body::-webkit-scrollbar { display: none; }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: 50px;
-  background: rgba(10, 18, 10, 0.72);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(192, 235, 194, 0.18);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.45);
-  transition: opacity 0.3s;
+  background: rgba(8, 16, 8, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(192, 235, 194, 0.20);
+  box-shadow: 0 4px 28px rgba(0,0,0,0.5);
 }
-.hud-bar:hover { opacity: 1 !important; }
 
 #play-btn {
   background: none;
   border: none;
   color: #c0ebc2;
-  font-size: 18px;
+  font-size: 17px;
   cursor: pointer;
   padding: 0 4px;
   line-height: 1;
@@ -99,7 +76,7 @@ body::-webkit-scrollbar { display: none; }
 
 #vol-icon {
   font-size: 14px;
-  color: #c0ebc2aa;
+  color: #c0ebc299;
   min-width: 18px;
 }
 
@@ -109,13 +86,13 @@ body::-webkit-scrollbar { display: none; }
   width: 72px;
   height: 3px;
   border-radius: 3px;
-  background: rgba(192, 235, 194, 0.25);
+  background: rgba(192, 235, 194, 0.22);
   outline: none;
   cursor: pointer;
 }
 #vol-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px; height: 12px;
+  width: 13px; height: 13px;
   border-radius: 50%;
   background: #c0ebc2;
   cursor: pointer;
@@ -129,85 +106,137 @@ body::-webkit-scrollbar { display: none; }
   width: 100%;
 }
 
-/* ---- Banner / Hero ---- */
+/* ======================== BANNER / PARALLAX ======================== */
 .banner {
   position: relative;
   height: 100vh;
   overflow: hidden;
 }
 
-/* Parallax bg layers */
-.bg-parallax {
+/* bg-group chứa tất cả layer parallax */
+.bg-group {
   position: absolute;
-  inset: -10% 0;       /* oversized so parallax never shows gap */
+  inset: 0;
   width: 100%;
+  height: 100%;
+}
+
+/* Mỗi .bg là 1 layer parallax, oversized để tránh gap khi dịch chuyển */
+.bg-group .bg {
+  position: absolute;
+  top: -15%;
+  left: 0;
+  width: 100%;
+  height: 130%;          /* cao hơn banner để parallax không lộ viền */
   background-size: cover;
   background-position: center bottom;
   will-change: transform;
 }
-.bg-parallax:nth-child(1) {
+
+/* Layer 1: nền cổng xa nhất */
+.bg-group .bg:nth-child(1) {
   background-image: url(image/cong\ 0.jpg);
   z-index: 1;
 }
-.bg-parallax:nth-child(2) {
+/* Layer 2: lớp giữa */
+.bg-group .bg:nth-child(2) {
   background-image: url(image/cong\ 1.6.png);
   z-index: 2;
 }
-/* Text layer — no movement, always centered */
-.bg-text {
-  position: absolute;
-  inset: 0;
+/* Layer 3: chữ — không có ảnh, không parallax, luôn giữa màn hình */
+.bg-group .bg:nth-child(3) {
+  top: 0; height: 100%;   /* không oversized vì không dịch */
   z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+  background: none;       /* không có ảnh nền */
+  /* QUAN TRỌNG: không có transform từ JS vì index 3 có speed=0 */
 }
-.bg-text h5 {
+.bg-group .bg:nth-child(3) h5 {
   color: #c0ebc2cc;
   font-family: 'Josefin Sans', sans-serif;
-  font-size: clamp(13px, 2vw, 22px);
-  font-weight: 300;
-  letter-spacing: 0.35em;
+  font-size: clamp(14px, 2vw, 22px);
+  font-weight: 600;
+  letter-spacing: 0.4em;
   text-transform: uppercase;
   margin: 0 0 12px;
-  text-shadow: 0 2px 20px #000;
+  text-shadow: 0 2px 16px #000, 0 0 40px rgba(0,0,0,0.8);
 }
-.bg-text h1 {
-  color: #c0ebc2;
+.bg-group .bg:nth-child(3) h1 {
+  color: #e8f5e9;
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(48px, 9vw, 120px);
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  font-size: clamp(56px, 10vw, 130px);
+  font-weight: 600;
+  letter-spacing: 0.2em;
   margin: 0;
-  text-shadow: 0 4px 40px rgba(0,0,0,0.8);
+  text-shadow: 0 4px 40px rgba(0,0,0,0.9), 0 0 80px rgba(0,0,0,0.6);
 }
-/* Subtle vignette on banner */
+/* Layer 4: cổng foreground, z cao nhất */
+.bg-group .bg:nth-child(4) {
+  background-image: url(image/cong\ 2.png);
+  z-index: 5;
+}
+/* Layer 5: nếu có */
+.bg-group .bg:nth-child(5) {
+  z-index: 6;
+}
+
+/* Vignette banner */
 .banner::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 3;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(1,3,2,0.65) 100%);
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(1,3,2,0.6) 100%);
   pointer-events: none;
 }
-/* Fade banner into tabs */
+
+/* Fade banner → tabs */
 .banner-fade {
   position: absolute;
   bottom: 0; left: 0;
-  width: 100%; height: 200px;
-  z-index: 5;
-  background: linear-gradient(to top, #010302, transparent);
+  width: 100%; height: 220px;
+  z-index: 7;
+  background: linear-gradient(to top, #010302 10%, transparent);
   pointer-events: none;
 }
 
-.bg-parallax:nth-child(4) {
-  background-image: url(image/cong\ 2.png);
-  z-index: 5;
+/* Scroll hint */
+.scroll-hint {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  color: rgba(192,235,194,0.55);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  animation: hint-pulse 2.5s infinite;
+}
+.scroll-hint::after {
+  content: '';
+  display: block;
+  margin: 10px auto 0;
+  width: 1px;
+  height: 0;
+  background: rgba(192,235,194,0.4);
+  animation: hint-line 2.5s infinite;
+}
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+@keyframes hint-line {
+  0% { height: 0; opacity: 0; }
+  40% { height: 40px; opacity: 0.6; }
+  100% { height: 40px; opacity: 0; }
 }
 
-/* ---- Tabs (sections) ---- */
+/* ======================== TABS ======================== */
 .tab {
   position: relative;
   min-height: 100vh;
@@ -216,20 +245,26 @@ body::-webkit-scrollbar { display: none; }
   justify-content: center;
   background-size: cover;
   background-position: center;
-  background-attachment: local; /* no CSS parallax — done via JS */
   overflow: hidden;
 }
 
-/* Subtle gradient overlay — reduced from original */
+/* Gradient overlay — giảm bớt mảng đen, để ảnh thở */
 .tab::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(1,3,2,0.88) 0%,
+    rgba(1,3,2,0.18) 28%,
+    rgba(1,3,2,0.08) 52%,
+    rgba(1,3,2,0.50) 100%
+  );
 }
 
-/* ---- Per-tab images ---- */
+/* Per-tab backgrounds */
 .tab.tab1  { background-image: url(image/Ho\ da.jpg); }
 .tab.tab2  { background-image: url(image/A8\ C23.jpg); background-position: bottom; }
 .tab.tab3  { background-image: url(image/4\ lù\ chan.jpg); }
@@ -241,144 +276,109 @@ body::-webkit-scrollbar { display: none; }
 .tab.tab9  { background-image: url(image/Quyết\ thắng\ lợi.jpg); }
 .tab.tab10 { background-image: url(image/dem\ gala2.png); background-position: top; }
 
-/* Reduced gradient overlay — was too heavy */
-.tab::before {
-  background: linear-gradient(
-    to top,
-    rgba(1,3,2,0.90) 0%,
-    rgba(1,3,2,0.20) 30%,
-    rgba(1,3,2,0.10) 55%,
-    rgba(1,3,2,0.55) 100%
-  );
+/* Số tab floating */
+.tab-label {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(192,235,194,0.30);
+  z-index: 2;
 }
 
-/* ---- Content box — fixed inside frame ---- */
+/* ======================== CONTENT ======================== */
 .content {
   position: relative;
   z-index: 1;
-  width: min(860px, 90vw);
-  /* NO transform from JS — content stays put */
-  padding: 3rem 2rem;
+  width: min(860px, 88vw);
+  padding: 3.5rem 2rem;
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  transform: translateY(32px);
+  transition: opacity 1s ease, transform 1s ease;
 }
 
-/* Triggered by IntersectionObserver */
 .tab.in-view .content {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ---- Typography ---- */
+/* ---- Typography — to hơn, đậm hơn ---- */
 .content h2 {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(32px, 5vw, 64px);
-  font-weight: 300;
-  color: #e8f5e9;
-  margin: 0 0 4px;
-  letter-spacing: 0.06em;
-  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
-}
-.content h5 {
-  font-family: 'Josefin Sans', sans-serif;
-  font-size: clamp(11px, 1.5vw, 15px);
-  font-weight: 300;
-  color: #a8cfa9;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  margin: 0 0 28px;
-}
-.content .des {
-  font-size: clamp(14px, 1.6vw, 18px);
-  line-height: 1.85;
-  color: #c8dec9;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.7);
-}
-.content .des p {
-  margin: 4px 0;
-}
-.content em {
-  color: #b8d4b9;
-  font-style: italic;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1em;
+  font-size: clamp(38px, 6vw, 76px);   /* to hơn */
+  font-weight: 700;                      /* đậm hơn */
+  color: #f0f8f0;
+  margin: 0 0 6px;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  /* shadow kép để nổi lên trên ảnh tối/sáng */
+  text-shadow:
+    0 2px 0 rgba(0,0,0,0.9),
+    0 4px 20px rgba(0,0,0,0.8),
+    0 0 60px rgba(0,0,0,0.5);
 }
 
-/* ---- Tab 2 grid ---- */
+.content h5 {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: clamp(12px, 1.6vw, 16px);
+  font-weight: 600;
+  color: #a8d4a9;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  margin: 0 0 28px;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+}
+
+.content .des {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: clamp(16px, 1.8vw, 20px);   /* to hơn */
+  font-weight: 400;
+  line-height: 1.9;
+  color: #daeeda;                          /* sáng hơn */
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.9),
+    0 2px 12px rgba(0,0,0,0.7);
+}
+
+.content .des p { margin: 6px 0; }
+
+.content em {
+  color: #c8e8ca;
+  font-style: italic;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.12em;
+  font-weight: 400;
+}
+
+/* Tab 2: 2 cột */
 .tab.tab2 .content .des {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px 32px;
+  gap: 16px 36px;
 }
 
-/* ---- Divider between banner & tabs ---- */
+/* Divider accent */
 .section-divider {
   height: 2px;
-  width: 60px;
-  background: rgba(192,235,194,0.35);
-  margin: 0 0 20px;
+  width: 56px;
+  background: rgba(192,235,194,0.4);
+  margin: 0 0 18px;
+  border-radius: 2px;
 }
 
-/* ---- Scroll-down hint ---- */
-.scroll-hint {
-  position: absolute;
-  bottom: 36px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  color: rgba(192,235,194,0.5);
-  font-size: 12px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  animation: bounce 2.4s infinite;
-}
-.scroll-hint::after {
-  content: '';
-  display: block;
-  margin: 8px auto 0;
-  width: 1px;
-  height: 36px;
-  background: rgba(192,235,194,0.3);
-  animation: grow 2.4s infinite;
-}
-@keyframes bounce {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.9; }
-}
-@keyframes grow {
-  0% { height: 0; opacity: 0; }
-  50% { height: 36px; opacity: 0.5; }
-  100% { height: 36px; opacity: 0; }
-}
-
-/* ---- Floating year label ---- */
-.tab-label {
-  position: absolute;
-  top: 32px;
-  right: 32px;
-  font-size: 11px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: rgba(192,235,194,0.35);
-  z-index: 2;
-}
-
-/* ---- Fade between sections ---- */
-.tab + .tab::before {
-  /* extra gradient top edge for smooth blending between tabs */
-}
-
-/* ---- Responsive ---- */
+/* ======================== RESPONSIVE ======================== */
 @media (max-width: 768px) {
-  .content { padding: 2rem 1.2rem; }
+  .content { padding: 2.5rem 1.4rem; }
   .tab.tab2 .content .des { grid-template-columns: 1fr; }
   .hud-bar { bottom: 16px; right: 16px; padding: 8px 12px; }
-  #vol-slider { width: 52px; }
-  .scroll-track { display: none; } /* on mobile native scroll is fine */
+  #vol-slider { width: 54px; }
+  .bg-group .bg:nth-child(3) h1 { font-size: clamp(40px, 12vw, 72px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .content { transition: none; opacity: 1; transform: none; }
-  .scroll-hint { animation: none; }
+  .scroll-hint, .scroll-hint::after { animation: none; }
 }
