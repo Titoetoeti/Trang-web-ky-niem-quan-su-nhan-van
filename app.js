@@ -1,23 +1,42 @@
 // =============================================
-//  MEMORIES — app.js (refactored)
-//  Fixes: scroll jank, black screen, text jump
-//  Features: parallax, music player, scrollbar
+//  MEMORIES — app.js
+//  Parallax 3D banner + reveal + music + grain
 // =============================================
 
-// ---------- Parallax banner (lightweight) ----------
-const bgLayers = document.querySelectorAll('.bg-parallax');
+// ---------- 3D Parallax banner ----------
+// Mỗi layer .bg trong .bg-group dịch chuyển với tốc độ khác nhau
+// tạo hiệu ứng chiều sâu 3D khi cuộn
+const bgLayers = document.querySelectorAll('.bg-group .bg');
+
+// Tốc độ parallax cho từng layer (index 0 = nền xa nhất, chậm nhất)
+// Giá trị âm = layer dịch lên khi cuộn xuống (hiệu ứng đẩy ra xa)
+const parallaxSpeeds = [0, 0.12, 0, 0.35, 0.55];
+
+let ticking = false;
 
 function updateParallax() {
   const scrollY = window.scrollY;
   bgLayers.forEach((layer, i) => {
-    const speed = parseFloat(layer.dataset.speed || 0);
-    layer.style.transform = `translateY(${scrollY * speed}px)`;
+    const speed = parallaxSpeeds[i] || 0;
+    if (speed !== 0) {
+      // translateY âm = layer dịch lên → tạo cảm giác layer ở phía trước
+      layer.style.transform = `translateY(${-scrollY * speed}px)`;
+    }
   });
+  ticking = false;
 }
 
-window.addEventListener('scroll', updateParallax, { passive: true });
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    requestAnimationFrame(updateParallax);
+    ticking = true;
+  }
+}, { passive: true });
 
-// ---------- Scroll-reveal for tab content ----------
+// Chạy lần đầu để set vị trí đúng
+updateParallax();
+
+// ---------- Scroll-reveal cho các tab ----------
 const tabs = document.querySelectorAll('.tab');
 
 const revealObserver = new IntersectionObserver(
@@ -28,50 +47,10 @@ const revealObserver = new IntersectionObserver(
       }
     });
   },
-  { threshold: 0.15 }
+  { threshold: 0.12 }
 );
 
 tabs.forEach(tab => revealObserver.observe(tab));
-
-// ---------- Custom scrollbar thumb ----------
-const scrollTrack = document.querySelector('.scroll-track');
-const scrollThumb = document.querySelector('.scroll-thumb');
-
-function updateScrollThumb() {
-  const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-  const thumbHeight = Math.max(40, window.innerHeight / document.body.scrollHeight * window.innerHeight);
-  const thumbTop = scrollPercent * (window.innerHeight - thumbHeight);
-  scrollThumb.style.height = thumbHeight + 'px';
-  scrollThumb.style.top = thumbTop + 'px';
-}
-
-window.addEventListener('scroll', updateScrollThumb, { passive: true });
-window.addEventListener('resize', updateScrollThumb);
-updateScrollThumb();
-
-// Drag scrollbar
-let isDragging = false;
-let dragStartY = 0;
-let dragStartScrollY = 0;
-
-scrollThumb.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  dragStartY = e.clientY;
-  dragStartScrollY = window.scrollY;
-  document.body.style.userSelect = 'none';
-});
-
-document.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
-  const delta = e.clientY - dragStartY;
-  const scrollRatio = document.body.scrollHeight / window.innerHeight;
-  window.scrollTo(0, dragStartScrollY + delta * scrollRatio);
-});
-
-document.addEventListener('mouseup', () => {
-  isDragging = false;
-  document.body.style.userSelect = '';
-});
 
 // ---------- Music player ----------
 const audio = document.getElementById('bg-music');
@@ -81,12 +60,12 @@ const volIcon = document.getElementById('vol-icon');
 
 let isPlaying = false;
 
-// Try autoplay (may be blocked by browser)
+// Autoplay khi user click lần đầu (browser policy)
 window.addEventListener('click', () => {
-  if (!isPlaying && audio) {
+  if (!isPlaying && audio && audio.src && !audio.src.includes('YOUR_MUSIC_FILE')) {
     audio.play().then(() => {
       isPlaying = true;
-      playBtn.textContent = '⏸';
+      if (playBtn) playBtn.textContent = '⏸';
     }).catch(() => {});
   }
 }, { once: true });
@@ -94,6 +73,7 @@ window.addEventListener('click', () => {
 if (playBtn) {
   playBtn.addEventListener('click', (e) => {
     e.stopPropagation();
+    if (!audio.src || audio.src.includes('YOUR_MUSIC_FILE')) return;
     if (isPlaying) {
       audio.pause();
       playBtn.textContent = '▶';
@@ -106,21 +86,23 @@ if (playBtn) {
   });
 }
 
-if (volSlider) {
+if (volSlider && audio) {
+  audio.volume = parseFloat(volSlider.value);
   volSlider.addEventListener('input', () => {
     const val = parseFloat(volSlider.value);
     audio.volume = val;
-    if (val === 0) volIcon.textContent = '🔇';
-    else if (val < 0.5) volIcon.textContent = '🔉';
-    else volIcon.textContent = '🔊';
+    if (volIcon) {
+      if (val === 0) volIcon.textContent = '🔇';
+      else if (val < 0.5) volIcon.textContent = '🔉';
+      else volIcon.textContent = '🔊';
+    }
   });
 }
 
-// ---------- Film grain animation ----------
+// ---------- Film grain ----------
 const canvas = document.getElementById('grain-canvas');
 if (canvas) {
   const ctx = canvas.getContext('2d');
-  let animFrame;
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -133,11 +115,11 @@ if (canvas) {
     const data = imageData.data;
     for (let i = 0; i < data.length; i += 4) {
       const v = Math.random() * 255 | 0;
-      data[i] = data[i+1] = data[i+2] = v;
-      data[i+3] = Math.random() * 18 | 0; // very subtle
+      data[i] = data[i + 1] = data[i + 2] = v;
+      data[i + 3] = Math.random() * 20 | 0;
     }
     ctx.putImageData(imageData, 0, 0);
-    animFrame = requestAnimationFrame(drawGrain);
+    requestAnimationFrame(drawGrain);
   }
 
   window.addEventListener('resize', resizeCanvas);
