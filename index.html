@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quân Sự Nhân văn 2024 — Memories</title>
+  <title>Quân Sự Nhân văn — Memories</title>
   <link rel="stylesheet" href="style.css">
   <link rel="shortcut icon" type="icon" href="image/icon ahegao.png">
 </head>
@@ -55,11 +55,6 @@
 <!-- Film grain canvas -->
 <canvas id="grain-canvas" aria-hidden="true"></canvas>
 
-<!-- Custom scrollbar -->
-<div class="scroll-track" aria-hidden="true">
-  <div class="scroll-thumb"></div>
-</div>
-
 <!-- HUD: music controls (bottom-right, fixed) -->
 <div class="hud-bar" title="Nhạc nền">
   <button id="play-btn" aria-label="Phát / Tạm dừng">▶</button>
@@ -72,23 +67,28 @@
 
   <!-- ======================== HERO BANNER ======================== -->
   <div class="banner">
-    <!-- Parallax layers -->
-    <div class="bg-parallax" data-speed="0.08"
-         style="background-image:url('image/cong 0.jpg')"></div>
-    <div class="bg-parallax" data-speed="0.22"
-         style="background-image:url('image/cong 1.6.png')"></div>
-
-    <!-- Foreground layer (trees / arch) — moves faster -->
-    <div class="bg-parallax" data-speed="0.42"
-         style="background-image:url('image/cong 2.png'); z-index:5;"></div>
-
-    <!-- Fixed text — never moves -->
-    <div class="bg-text">
-      <h5>Quân sự nhân văn - 2024 </h5>
-      <h1>MEMORIES</h1>
+    <!-- bg-group: các layer parallax 3D
+         JS sẽ đọc các .bg theo index và áp tốc độ parallaxSpeeds[i]
+         Layer 3 (index 2, .bg:nth-child(3)) có speed=0 → chứa chữ, không dịch chuyển -->
+    <div class="bg-group">
+      <!-- Layer 1: background xa nhất, tốc độ chậm nhất (speed 0.12) -->
+      <div class="bg"></div>
+      <!-- Layer 2: lớp giữa (speed 0.22) -->
+      <div class="bg">
+        <!-- Không có ảnh nền, layer trung gian -->
+      </div>
+      <!-- Layer 3: CHỨA CHỮ — speed=0, luôn đứng yên giữa màn hình -->
+      <div class="bg">
+        <h5>Quân sự nhân văn</h5>
+        <h1>MEMORIES</h1>
+      </div>
+      <!-- Layer 4: cổng foreground (speed 0.35) -->
+      <div class="bg"></div>
+      <!-- Layer 5: layer trước nhất, nhanh nhất (speed 0.55) -->
+      <div class="bg"></div>
     </div>
 
-    <!-- Bottom fade -->
+    <!-- Bottom fade sang tabs -->
     <div class="banner-fade"></div>
 
     <!-- Scroll hint -->
