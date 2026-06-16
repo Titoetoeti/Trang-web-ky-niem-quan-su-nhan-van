@@ -11,51 +11,37 @@
 
 <!-- ========================================================
      NHẠC NỀN — Hướng dẫn chèn nhạc:
-     1. Upload file nhạc (.mp3 hoặc .ogg) vào cùng thư mục project
-        (ví dụ: music/nhac-nen.mp3)
-     2. Thay "YOUR_MUSIC_FILE.mp3" bên dưới bằng đường dẫn thực
-     3. Hoặc dùng link YouTube → dùng dịch vụ convert sang mp3
-        rồi host trên Google Drive (link direct download)
-     4. Nếu dùng Google Drive: File → Share → Copy link → 
-        đổi "open?id=XXX" thành "uc?export=download&id=XXX"
-     
-     Gợi ý nhạc phù hợp kỉ niệm quân sự:
-     - "Màu hoa đỏ" — Thuận Yến
-     - "Hành quân xa" (acoustic cover)
-     - Bất kỳ bản piano nhẹ / lo-fi chill nào
+     1. Upload file nhạc .mp3 vào cùng thư mục project
+        Ví dụ: để file "nhac.mp3" vào thư mục gốc (cạnh index.html)
+     2. Thay "YOUR_MUSIC_FILE.mp3" dưới đây thành "nhac.mp3"
+     3. Hoặc host trên Google Drive:
+        Share file → Copy link → đổi:
+        "drive.google.com/file/d/ID/view" 
+        thành "drive.google.com/uc?export=download&id=ID"
 ======================================================== -->
 <audio id="bg-music" loop preload="auto">
   <source src="YOUR_MUSIC_FILE.mp3" type="audio/mpeg">
-  <!-- Dự phòng nếu có file .ogg: -->
-  <!-- <source src="YOUR_MUSIC_FILE.ogg" type="audio/ogg"> -->
 </audio>
 
 <!-- ========================================================
-     VIDEO — Hướng dẫn chèn video vào bất kỳ tab nào:
-     Thêm đoạn sau vào bên trong <div class="content"> của tab muốn chèn:
+     VIDEO — Để chèn video vào bất kỳ tab nào:
+     Thêm vào trong <div class="content"> của tab đó:
 
      <video class="tab-video" autoplay muted loop playsinline>
-       <source src="video/ten-video.mp4" type="video/mp4">
+       <source src="video/clip.mp4" type="video/mp4">
      </video>
 
-     Rồi thêm CSS:
+     CSS cần thêm vào style.css:
      .tab-video {
        width: 100%; max-width: 800px;
-       border-radius: 8px;
-       margin-top: 20px;
-       opacity: 0.85;
+       border-radius: 8px; margin-top: 20px; opacity: 0.9;
      }
-
-     Nếu muốn embed YouTube (không autoplay được):
-     <iframe width="100%" height="400"
-       src="https://www.youtube.com/embed/VIDEO_ID?autoplay=0"
-       frameborder="0" allowfullscreen></iframe>
 ======================================================== -->
 
-<!-- Film grain canvas -->
+<!-- Film grain -->
 <canvas id="grain-canvas" aria-hidden="true"></canvas>
 
-<!-- HUD: music controls (bottom-right, fixed) -->
+<!-- HUD nhạc (fixed bottom-right) -->
 <div class="hud-bar" title="Nhạc nền">
   <button id="play-btn" aria-label="Phát / Tạm dừng">▶</button>
   <span id="vol-icon" aria-hidden="true">🔊</span>
@@ -65,37 +51,34 @@
 
 <div class="container">
 
-  <!-- ======================== HERO BANNER ======================== -->
+  <!-- ====================== BANNER PARALLAX 3D ======================
+       Cấu trúc bg-group: 5 layer .bg chồng nhau
+       JS đọc các .bg theo index và dịch translateY(-scrollY * index * 0.35)
+       Layer 0 (bg:nth-child 1) = nền xa nhất, speed=0 (không dịch)
+       Layer 1 (bg:nth-child 2) = lớp giữa, speed thấp
+       Layer 2 (bg:nth-child 3) = chữ, speed trung bình
+       Layer 3 (bg:nth-child 4) = cổng foreground, speed cao → cảm giác gần nhất
+       ================================================================ -->
   <div class="banner">
-    <!-- bg-group: các layer parallax 3D
-         JS sẽ đọc các .bg theo index và áp tốc độ parallaxSpeeds[i]
-         Layer 3 (index 2, .bg:nth-child(3)) có speed=0 → chứa chữ, không dịch chuyển -->
     <div class="bg-group">
-      <!-- Layer 1: background xa nhất, tốc độ chậm nhất (speed 0.12) -->
+      <!-- Layer 1: Nền xa — đứng yên làm gốc -->
       <div class="bg"></div>
-      <!-- Layer 2: lớp giữa (speed 0.22) -->
-      <div class="bg">
-        <!-- Không có ảnh nền, layer trung gian -->
-      </div>
-      <!-- Layer 3: CHỨA CHỮ — speed=0, luôn đứng yên giữa màn hình -->
+      <!-- Layer 2: Lớp trung gian (cong 1.6) -->
+      <div class="bg"></div>
+      <!-- Layer 3: Chữ tiêu đề -->
       <div class="bg">
         <h5>Quân sự nhân văn</h5>
         <h1>MEMORIES</h1>
       </div>
-      <!-- Layer 4: cổng foreground (speed 0.35) -->
+      <!-- Layer 4: Cổng foreground (cong 2) — di chuyển nhanh nhất -->
       <div class="bg"></div>
-      <!-- Layer 5: layer trước nhất, nhanh nhất (speed 0.55) -->
+      <!-- Layer 5: (để trống, có thể thêm layer sau này) -->
       <div class="bg"></div>
     </div>
 
-    <!-- Bottom fade sang tabs -->
     <div class="banner-fade"></div>
-
-    <!-- Scroll hint -->
     <div class="scroll-hint">Cuộn xuống</div>
   </div>
-  <!-- ============================================================ -->
-
 
   <!-- ======================== TAB 1 ======================== -->
   <div class="tab tab1">
@@ -205,7 +188,7 @@
           <div><em>Đừng hỏi tên tui</em></div>
           <div><em>Đêm nay tui đang cô đơn quá, hem zui</em></div>
         </div>
-        <p style="margin-top:16px; font-size:1.15em; letter-spacing:0.05em;">
+        <p style="margin-top:16px; font-size:1.1em; letter-spacing:0.05em;">
           <strong>Vì sao thế, vì sạo lòng!</strong>
         </p>
       </div>
@@ -220,7 +203,7 @@
       <h2>Ngày đầu nhận phòng</h2>
       <h5>/tổ đội đẹp trai/</h5>
       <div class="des">
-        <!-- Chèn ảnh hoặc video ở đây nếu muốn -->
+        <!-- Chèn ảnh hoặc video ở đây -->
       </div>
     </div>
   </div>
@@ -246,7 +229,7 @@
       <h2>Học Bãi tập</h2>
       <h5>/Có gì lạ Thiệu Khang sẽ lôi đầu ae đi chụp hình/</h5>
       <div class="des">
-        <!-- Chèn ảnh hoặc video ở đây nếu muốn -->
+        <!-- Chèn ảnh hoặc video ở đây -->
       </div>
     </div>
   </div>
@@ -274,7 +257,7 @@
       <h2>Cảm ơn</h2>
       <h5>/K431 · C23 · A8/</h5>
       <div class="des">
-        <!-- Lời cảm ơn / closing message nếu muốn thêm -->
+        <!-- Lời cảm ơn nếu muốn thêm -->
       </div>
     </div>
   </div>
