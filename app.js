@@ -1,44 +1,40 @@
 // =============================================
 //  MEMORIES — app.js
-//  Parallax 3D banner + reveal + music + grain
+//  Parallax 3D gốc, viết lại mượt hơn
+//  Logic: mỗi .bg dịch translateY(-scrollY * index)
+//  Layer index lớn hơn = di chuyển nhanh hơn = gần hơn
 // =============================================
 
-// ---------- 3D Parallax banner ----------
-// Mỗi layer .bg trong .bg-group dịch chuyển với tốc độ khác nhau
-// tạo hiệu ứng chiều sâu 3D khi cuộn
-const bgLayers = document.querySelectorAll('.bg-group .bg');
+const listBg = document.querySelectorAll('.bg-group .bg');
+const tabs   = document.querySelectorAll('.tab');
 
-// Tốc độ parallax cho từng layer (index 0 = nền xa nhất, chậm nhất)
-// Giá trị âm = layer dịch lên khi cuộn xuống (hiệu ứng đẩy ra xa)
-const parallaxSpeeds = [0, 0.12, 0, 0.35, 0.55];
+// ---------- Parallax 3D banner ----------
+let rafPending = false;
 
-let ticking = false;
+function applyParallax() {
+  const top = window.scrollY;
 
-function updateParallax() {
-  const scrollY = window.scrollY;
-  bgLayers.forEach((layer, i) => {
-    const speed = parallaxSpeeds[i] || 0;
-    if (speed !== 0) {
-      // translateY âm = layer dịch lên → tạo cảm giác layer ở phía trước
-      layer.style.transform = `translateY(${-scrollY * speed}px)`;
-    }
+  listBg.forEach((bg, index) => {
+    if (index === 0) return; // layer nền đứng yên làm gốc
+
+    // Giữ nguyên công thức gốc: -top * index
+    // Dùng style.transform thay vì .animate() để tránh jank
+    bg.style.transform = `translateY(${-top * index * 0.35}px)`;
   });
-  ticking = false;
+
+  rafPending = false;
 }
 
 window.addEventListener('scroll', () => {
-  if (!ticking) {
-    requestAnimationFrame(updateParallax);
-    ticking = true;
+  if (!rafPending) {
+    rafPending = true;
+    requestAnimationFrame(applyParallax);
   }
 }, { passive: true });
 
-// Chạy lần đầu để set vị trí đúng
-updateParallax();
+applyParallax(); // set ngay lúc load
 
-// ---------- Scroll-reveal cho các tab ----------
-const tabs = document.querySelectorAll('.tab');
-
+// ---------- Scroll-reveal cho content từng tab ----------
 const revealObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach(entry => {
@@ -53,16 +49,17 @@ const revealObserver = new IntersectionObserver(
 tabs.forEach(tab => revealObserver.observe(tab));
 
 // ---------- Music player ----------
-const audio = document.getElementById('bg-music');
-const playBtn = document.getElementById('play-btn');
+const audio     = document.getElementById('bg-music');
+const playBtn   = document.getElementById('play-btn');
 const volSlider = document.getElementById('vol-slider');
-const volIcon = document.getElementById('vol-icon');
+const volIcon   = document.getElementById('vol-icon');
 
 let isPlaying = false;
 
-// Autoplay khi user click lần đầu (browser policy)
+// Autoplay khi user tương tác lần đầu (browser policy)
 window.addEventListener('click', () => {
-  if (!isPlaying && audio && audio.src && !audio.src.includes('YOUR_MUSIC_FILE')) {
+  if (!isPlaying && audio && audio.currentSrc &&
+      !audio.currentSrc.includes('YOUR_MUSIC_FILE')) {
     audio.play().then(() => {
       isPlaying = true;
       if (playBtn) playBtn.textContent = '⏸';
@@ -73,7 +70,7 @@ window.addEventListener('click', () => {
 if (playBtn) {
   playBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (!audio.src || audio.src.includes('YOUR_MUSIC_FILE')) return;
+    if (!audio.currentSrc || audio.currentSrc.includes('YOUR_MUSIC_FILE')) return;
     if (isPlaying) {
       audio.pause();
       playBtn.textContent = '▶';
@@ -92,9 +89,7 @@ if (volSlider && audio) {
     const val = parseFloat(volSlider.value);
     audio.volume = val;
     if (volIcon) {
-      if (val === 0) volIcon.textContent = '🔇';
-      else if (val < 0.5) volIcon.textContent = '🔉';
-      else volIcon.textContent = '🔊';
+      volIcon.textContent = val === 0 ? '🔇' : val < 0.5 ? '🔉' : '🔊';
     }
   });
 }
@@ -105,20 +100,20 @@ if (canvas) {
   const ctx = canvas.getContext('2d');
 
   function resizeCanvas() {
-    canvas.width = window.innerWidth;
+    canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
   }
 
   function drawGrain() {
-    const w = canvas.width, h = canvas.height;
-    const imageData = ctx.createImageData(w, h);
-    const data = imageData.data;
+    const { width: w, height: h } = canvas;
+    const img  = ctx.createImageData(w, h);
+    const data = img.data;
     for (let i = 0; i < data.length; i += 4) {
       const v = Math.random() * 255 | 0;
-      data[i] = data[i + 1] = data[i + 2] = v;
-      data[i + 3] = Math.random() * 20 | 0;
+      data[i] = data[i+1] = data[i+2] = v;
+      data[i+3] = Math.random() * 18 | 0;
     }
-    ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(img, 0, 0);
     requestAnimationFrame(drawGrain);
   }
 
