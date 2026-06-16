@@ -1,10 +1,10 @@
 /* =============================================
    MEMORIES — style.css
+   Parallax 3D gốc + gradient đen to hơn ở viền
    ============================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
-/* ---- Reset & Base ---- */
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
@@ -16,25 +16,17 @@ body {
   overflow-x: hidden;
 }
 
-/* ---- Styled native scrollbar (1 cái duy nhất, không div HTML) ---- */
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.04);
-}
+/* Scrollbar mỏng, style giống kính, 1 cái duy nhất */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
 ::-webkit-scrollbar-thumb {
-  background: rgba(192, 235, 194, 0.30);
+  background: rgba(192,235,194,0.28);
   border-radius: 5px;
-  transition: background 0.3s;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(192, 235, 194, 0.72);
-}
-/* Firefox */
-* { scrollbar-width: thin; scrollbar-color: rgba(192,235,194,0.30) rgba(255,255,255,0.04); }
+::-webkit-scrollbar-thumb:hover { background: rgba(192,235,194,0.70); }
+* { scrollbar-width: thin; scrollbar-color: rgba(192,235,194,0.28) transparent; }
 
-/* ---- Film grain overlay ---- */
+/* Film grain */
 #grain-canvas {
   position: fixed;
   top: 0; left: 0;
@@ -44,76 +36,59 @@ body {
   mix-blend-mode: overlay;
 }
 
-/* ---- Music HUD bar (fixed bottom-right) ---- */
+/* HUD nhạc */
 .hud-bar {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 24px; right: 24px;
   z-index: 1001;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 18px;
   border-radius: 50px;
-  background: rgba(8, 16, 8, 0.78);
+  background: rgba(8,16,8,0.78);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(192, 235, 194, 0.20);
+  border: 1px solid rgba(192,235,194,0.20);
   box-shadow: 0 4px 28px rgba(0,0,0,0.5);
 }
-
 #play-btn {
-  background: none;
-  border: none;
-  color: #c0ebc2;
-  font-size: 17px;
-  cursor: pointer;
-  padding: 0 4px;
-  line-height: 1;
+  background: none; border: none;
+  color: #c0ebc2; font-size: 17px;
+  cursor: pointer; padding: 0 4px;
   transition: transform 0.2s;
 }
 #play-btn:hover { transform: scale(1.2); }
-
-#vol-icon {
-  font-size: 14px;
-  color: #c0ebc299;
-  min-width: 18px;
-}
-
+#vol-icon { font-size: 14px; color: #c0ebc299; min-width: 18px; }
 #vol-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 72px;
-  height: 3px;
-  border-radius: 3px;
-  background: rgba(192, 235, 194, 0.22);
-  outline: none;
-  cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  width: 72px; height: 3px; border-radius: 3px;
+  background: rgba(192,235,194,0.22);
+  outline: none; cursor: pointer;
 }
 #vol-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 13px; height: 13px;
-  border-radius: 50%;
-  background: #c0ebc2;
-  cursor: pointer;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #c0ebc2; cursor: pointer;
   transition: transform 0.2s;
 }
 #vol-slider:hover::-webkit-slider-thumb { transform: scale(1.3); }
 
-/* ---- Container ---- */
+/* ======================== BANNER PARALLAX ======================== */
 .container {
   position: relative;
   width: 100%;
-}
-
-/* ======================== BANNER / PARALLAX ======================== */
-.banner {
-  position: relative;
-  height: 100vh;
+  /* QUAN TRỌNG: overflow hidden để layer parallax không tràn ra ngoài */
   overflow: hidden;
 }
 
-/* bg-group chứa tất cả layer parallax */
+.banner {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* bg-group chứa tất cả layer */
 .bg-group {
   position: absolute;
   inset: 0;
@@ -121,76 +96,82 @@ body {
   height: 100%;
 }
 
-/* Mỗi .bg là 1 layer parallax, oversized để tránh gap khi dịch chuyển */
+/* Mỗi .bg là 1 layer parallax
+   oversized (top:-20%, height:140%) để khi translateY không lộ khoảng trắng */
 .bg-group .bg {
   position: absolute;
-  top: -15%;
+  top: -20%;
   left: 0;
   width: 100%;
-  height: 130%;          /* cao hơn banner để parallax không lộ viền */
-  background-size: cover;
+  height: 140%;
+  background-size: 100%;
   background-position: center bottom;
   will-change: transform;
 }
 
-/* Layer 1: nền cổng xa nhất */
+/* Layer 1: nền cổng xa nhất — index 0, KHÔNG translateY (làm gốc) */
 .bg-group .bg:nth-child(1) {
   background-image: url(image/cong\ 0.jpg);
   z-index: 1;
 }
-/* Layer 2: lớp giữa */
+
+/* Layer 2: lớp giữa — index 1 */
 .bg-group .bg:nth-child(2) {
   background-image: url(image/cong\ 1.6.png);
   z-index: 2;
 }
-/* Layer 3: chữ — không có ảnh, không parallax, luôn giữa màn hình */
+
+/* Layer 3: CHỮ — index 2, JS dịch chuyển nhưng chúng ta căn chỉnh
+   bằng cách đặt top:0, height:100% (không oversized vì chứa chữ) */
 .bg-group .bg:nth-child(3) {
-  top: 0; height: 100%;   /* không oversized vì không dịch */
+  top: 0;
+  height: 100%;
+  background: none;
   z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: none;       /* không có ảnh nền */
-  /* QUAN TRỌNG: không có transform từ JS vì index 3 có speed=0 */
 }
 .bg-group .bg:nth-child(3) h5 {
   color: #c0ebc2cc;
   font-family: 'Josefin Sans', sans-serif;
-  font-size: clamp(14px, 2vw, 22px);
+  font-size: clamp(13px, 1.8vw, 20px);
   font-weight: 600;
   letter-spacing: 0.4em;
   text-transform: uppercase;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   text-shadow: 0 2px 16px #000, 0 0 40px rgba(0,0,0,0.8);
 }
 .bg-group .bg:nth-child(3) h1 {
   color: #e8f5e9;
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(56px, 10vw, 130px);
+  font-size: clamp(52px, 9vw, 120px);
   font-weight: 600;
   letter-spacing: 0.2em;
   margin: 0;
   text-shadow: 0 4px 40px rgba(0,0,0,0.9), 0 0 80px rgba(0,0,0,0.6);
 }
-/* Layer 4: cổng foreground, z cao nhất */
+
+/* Layer 4: cổng foreground — index 3, dịch nhanh nhất → cảm giác gần nhất */
 .bg-group .bg:nth-child(4) {
   background-image: url(image/cong\ 2.png);
   z-index: 5;
 }
-/* Layer 5: nếu có */
+
+/* Layer 5 nếu có */
 .bg-group .bg:nth-child(5) {
   z-index: 6;
 }
 
-/* Vignette banner */
+/* Vignette tối bốn góc banner */
 .banner::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 3;
-  background: radial-gradient(ellipse at center, transparent 35%, rgba(1,3,2,0.6) 100%);
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(1,3,2,0.7) 100%);
   pointer-events: none;
 }
 
@@ -200,15 +181,14 @@ body {
   bottom: 0; left: 0;
   width: 100%; height: 220px;
   z-index: 7;
-  background: linear-gradient(to top, #010302 10%, transparent);
+  background: linear-gradient(to top, #010302 15%, transparent);
   pointer-events: none;
 }
 
 /* Scroll hint */
 .scroll-hint {
   position: absolute;
-  bottom: 36px;
-  left: 50%;
+  bottom: 32px; left: 50%;
   transform: translateX(-50%);
   z-index: 10;
   color: rgba(192,235,194,0.55);
@@ -221,19 +201,15 @@ body {
   content: '';
   display: block;
   margin: 10px auto 0;
-  width: 1px;
-  height: 0;
+  width: 1px; height: 0;
   background: rgba(192,235,194,0.4);
   animation: hint-line 2.5s infinite;
 }
-@keyframes hint-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
-}
+@keyframes hint-pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 @keyframes hint-line {
-  0% { height: 0; opacity: 0; }
-  40% { height: 40px; opacity: 0.6; }
-  100% { height: 40px; opacity: 0; }
+  0%   { height:0;    opacity:0 }
+  40%  { height:40px; opacity:.6 }
+  100% { height:40px; opacity:0 }
 }
 
 /* ======================== TABS ======================== */
@@ -248,7 +224,8 @@ body {
   overflow: hidden;
 }
 
-/* Gradient overlay — giảm bớt mảng đen, để ảnh thở */
+/* Gradient đen viền: to hơn so với trước
+   top/bottom đen đậm hơn, vùng trong sáng hơn → frame ảnh rõ hơn */
 .tab::before {
   content: '';
   position: absolute;
@@ -256,11 +233,28 @@ body {
   z-index: 0;
   pointer-events: none;
   background: linear-gradient(
-    to top,
-    rgba(1,3,2,0.88) 0%,
-    rgba(1,3,2,0.18) 28%,
-    rgba(1,3,2,0.08) 52%,
-    rgba(1,3,2,0.50) 100%
+    to bottom,
+    rgba(1,3,2,0.82) 0%,
+    rgba(1,3,2,0.12) 22%,
+    rgba(1,3,2,0.06) 50%,
+    rgba(1,3,2,0.12) 78%,
+    rgba(1,3,2,0.88) 100%
+  );
+}
+
+/* Thêm viền đen trái-phải bằng ::after */
+.tab::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(1,3,2,0.65) 0%,
+    transparent 18%,
+    transparent 82%,
+    rgba(1,3,2,0.65) 100%
   );
 }
 
@@ -276,15 +270,12 @@ body {
 .tab.tab9  { background-image: url(image/Quyết\ thắng\ lợi.jpg); }
 .tab.tab10 { background-image: url(image/dem\ gala2.png); background-position: top; }
 
-/* Số tab floating */
+/* Số tab */
 .tab-label {
   position: absolute;
-  top: 28px;
-  right: 28px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
+  top: 28px; right: 28px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.35em; text-transform: uppercase;
   color: rgba(192,235,194,0.30);
   z-index: 2;
 }
@@ -305,80 +296,74 @@ body {
   transform: translateY(0);
 }
 
-/* ---- Typography — to hơn, đậm hơn ---- */
+/* Typography */
 .content h2 {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(38px, 6vw, 76px);   /* to hơn */
-  font-weight: 700;                      /* đậm hơn */
+  font-size: clamp(36px, 5.5vw, 72px);
+  font-weight: 700;
   color: #f0f8f0;
   margin: 0 0 6px;
   letter-spacing: 0.05em;
   line-height: 1.1;
-  /* shadow kép để nổi lên trên ảnh tối/sáng */
   text-shadow:
-    0 2px 0 rgba(0,0,0,0.9),
-    0 4px 20px rgba(0,0,0,0.8),
-    0 0 60px rgba(0,0,0,0.5);
+    0 2px 0 rgba(0,0,0,0.95),
+    0 4px 20px rgba(0,0,0,0.85),
+    0 0 60px rgba(0,0,0,0.6);
 }
 
 .content h5 {
   font-family: 'Josefin Sans', sans-serif;
-  font-size: clamp(12px, 1.6vw, 16px);
+  font-size: clamp(12px, 1.5vw, 15px);
   font-weight: 600;
   color: #a8d4a9;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-  margin: 0 0 28px;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+  margin: 0 0 26px;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.95);
 }
 
 .content .des {
   font-family: 'Josefin Sans', sans-serif;
-  font-size: clamp(16px, 1.8vw, 20px);   /* to hơn */
+  font-size: clamp(15px, 1.7vw, 19px);
   font-weight: 400;
   line-height: 1.9;
-  color: #daeeda;                          /* sáng hơn */
+  color: #dff0df;
   text-shadow:
-    0 1px 0 rgba(0,0,0,0.9),
-    0 2px 12px rgba(0,0,0,0.7);
+    0 1px 0 rgba(0,0,0,0.95),
+    0 2px 14px rgba(0,0,0,0.8);
 }
-
 .content .des p { margin: 6px 0; }
 
 .content em {
-  color: #c8e8ca;
+  color: #cce8cc;
   font-style: italic;
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.12em;
-  font-weight: 400;
 }
 
-/* Tab 2: 2 cột */
 .tab.tab2 .content .des {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px 36px;
+  gap: 14px 36px;
 }
 
-/* Divider accent */
 .section-divider {
-  height: 2px;
-  width: 56px;
+  height: 2px; width: 56px;
   background: rgba(192,235,194,0.4);
   margin: 0 0 18px;
   border-radius: 2px;
 }
 
-/* ======================== RESPONSIVE ======================== */
+/* Responsive */
 @media (max-width: 768px) {
   .content { padding: 2.5rem 1.4rem; }
   .tab.tab2 .content .des { grid-template-columns: 1fr; }
   .hud-bar { bottom: 16px; right: 16px; padding: 8px 12px; }
   #vol-slider { width: 54px; }
-  .bg-group .bg:nth-child(3) h1 { font-size: clamp(40px, 12vw, 72px); }
+  .bg-group .bg:nth-child(3) h1 { font-size: clamp(40px,12vw,72px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .content { transition: none; opacity: 1; transform: none; }
-  .scroll-hint, .scroll-hint::after { animation: none; }
+  .bg-group .bg { will-change: auto; }
 }
